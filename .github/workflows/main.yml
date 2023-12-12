@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest  
     steps:
       - name: Code checkout
-        uses: actions/chekout@v4
+        uses: actions/checkout@v4
       
       - name: Update application.properties file
         run: |
