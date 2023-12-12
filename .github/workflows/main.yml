@@ -38,6 +38,7 @@ jobs:
           -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
   
   BUILD_AND_PUBLISH:
+    needs: Testing
     runs-on: ubuntu-latest  
     steps:
       - name: Code checkout
