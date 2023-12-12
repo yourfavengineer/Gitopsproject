@@ -1,5 +1,7 @@
 name: Hprofile Actions
 on: workflow_dispatch
+env: 
+  AWS_REGION: us-east-1
 jobs:
   Testing:
     runs-on: ubuntu-latest
@@ -24,13 +26,39 @@ jobs:
         uses: warchant/setup-sonar-scanner@v7
       # Run sonar-scanner
       - name: SonarQube Scan
-        run: sonar-scanner \
-          -Dsonar.host.url=${{ secrets.SONARCLOUD }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-          -Dsonar.sources=src/ \
-          -Dsonar.junit.reportsPath=target/surefire-reports/ \
-          -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
+        run: sonar-scanner
+          -Dsonar.host.url=${{ secrets.SONAR_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.sources=src/
+          -Dsonar.junit.reportsPath=target/surefire-reports/ 
+          -Dsonar.jacoco.reportsPath=target/jacoco.exec 
+          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
           -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
+  
+  BUILD_AND_PUBLISH:
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Code checkout
+        uses: actions/chekout@v4
+      
+      - name: Update application.properties file
+        run: |
+          sed -i "s/^jdbc.username.*$/jdbc.username\=${{ secrets.RDS_USER }}/" src/main/resources/application.properties
+          sed -i "s/^jdbc.password.*$/jdbc.password\=${{ secrets.RDS_PASS }}/" src/main/resources/application.properties
+          sed -i "s/db01/${{ secrets.RDS_ENDPOINT }}/" src/main/resources/application.properties
+
+      - name: Build & Upload image to ECR
+        uses: appleboy/docker-ecr-action@master
+        with:
+          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          registry: ${{ secrets.REGISTRY }}
+          repo: gitubactions-ecr
+          region: ${{ env.AWS_REGION }}
+          tags: latest,${{ github.run_number }}
+          daemon_off: false
+          dockerfile: ./Dockerfile
+          context: ./
+
