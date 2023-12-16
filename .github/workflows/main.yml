@@ -2,6 +2,12 @@ name: Hprofile Actions
 on: workflow_dispatch
 env: 
   AWS_REGION: us-east-1
+  ECR_REPOSITORY: githubactions-ecr  
+  ECS_SERVICE: githubactions-service
+  ECS_CLUSTER: githubactions-ecs
+  ECS_TASK_DEFINITION: githubactions-td
+  CONTAINER_NAME: githubactions
+  
 jobs:
   Testing:
     runs-on: ubuntu-latest
@@ -61,4 +67,3 @@ jobs:
           daemon_off: false
           dockerfile: ./Dockerfile
           context: ./
-
