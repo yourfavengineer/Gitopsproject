@@ -21,9 +21,12 @@ jobs:
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '11'
+
         # setup or sonarcloud server details
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
+
+
       # Run sonar-scanner
       - name: SonarQube Scan
         run: sonar-scanner
@@ -41,8 +44,7 @@ jobs:
      needs: Testing
      runs-on: ubuntu-latest
      steps:
-       - name: actions/checkout@v2
-         uses: docker://ghcr.io/kciter/aws-ecr-action:latest
+       - uses: actions/checkout@v2        
        - name: Update application.properties file
          run: |
            sed -i "s/^jdbc.username.*$/jdbc.username\=${{ secrets.RDS_USER }}/" src/main/resources/application.properties
